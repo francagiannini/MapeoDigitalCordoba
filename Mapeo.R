@@ -10,13 +10,11 @@ baseDatos <- st_as_sf(baseDatos, coords = c("Xt","Yt"),  crs = 32720)
 ggplot(baseDatos) +
   annotation_map_tile(zoom = 7) +
   geom_sf() + 
-  scale_fill_viridis_c(trans = "sqrt", alpha = .4) +
-  annotation_scale(location = "bl", width_hint = 0.4) +
-  annotation_north_arrow(location = "bl", which_north = "true", 
-                         # pad_x = 0, pad_y = 1, #unit(0, "in"), pad_y = unit(0, "in"),
+  annotation_scale(location = "br", width_hint = 0.4) +
+  annotation_north_arrow(location = "tl", which_north = "grid", 
                          style = north_arrow_fancy_orienteering) +
-  # coord_sf(xlim = c(-88, -78), ylim = c(24.5, 33), expand = FALSE) +
   xlab("Longitud") + ylab("Latitud") +
-  theme(panel.grid.major = element_line(color = gray(0.5), linetype = "dashed", 
-                                        size = 0.5), panel.background = element_rect(fill = "aliceblue"))
+  theme(panel.grid.major = element_line(color = gray(0.5), linetype = "dashed", size = 0.5))  +
+  coord_sf(crs = 32720)
+
 
