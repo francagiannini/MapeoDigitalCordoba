@@ -1,25 +1,26 @@
-library(sf)
-library(ggplot2)
-library(ggspatial)
-library(ggmap)
+source("Functions/FuncLib.R")
 
-limiteProv <- read_sf("Datos/provCba")
+limiteProv <- read_sf("Datos/provCba/prov_cba_cg.shp")
 baseDatos <- read.table("Datos/suelos.txt", header = TRUE)
 baseDatos <- st_as_sf(baseDatos, coords = c("Xt","Yt"),  crs = 32720)
 
-
+library(ggsn)
 ggplot(baseDatos) +
-  annotation_map_tile(zoom = 10) +
-  geom_sf(data = limiteProv, fill = NA) +
-  geom_sf(data = limiteProv) +
+  # annotation_map_tile(zoom = 10) +
+  geom_sf(data = limiteProv, fill = NA, size = 0.4, color = "black") +
   geom_sf() + 
-  annotation_scale(location = "br") + #, width_hint = 0.4) +
-  annotation_north_arrow(location = "tl", which_north = "grid", 
-                         style = north_arrow_fancy_orienteering) +
-  xlab("Longitud") + ylab("Latitud") +
-  theme(panel.grid.major = element_line(color = gray(0.5), linetype = "dashed", size = 0.5))
+  # scalebar(baseDatos, dist = 50, dist_unit = "km",
+           # transform = FALSE,height = 0.018, st.dist = 0.02, st.bottom = FALSE, st.size = 3) +
+  # north(baseDatos, symbol = 3)
+theme_map(baseDatos)
 
 
-ggdraw() +
-  draw_plot(plot_fr) +
-  draw_plot(plot_wolrd, x = 0.15, y = 0.14, width = .25, height = .25)
+  
+  
+  # annotation_scale(location = "bl", bar_cols = c("black", "white"), 
+  #                   height = unit(0.25,"cm"),
+  #                  pad_x = unit(0.25, "cm"), pad_y = unit(0.25, "cm"),
+  #                  text_pad = unit(0.15, "cm"), text_cex = 0.8, width_hint = 0.25)
+  # 
+
+
