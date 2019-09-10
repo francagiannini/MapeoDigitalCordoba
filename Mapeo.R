@@ -10,6 +10,7 @@ baseDatos <- st_as_sf(baseDatos, coords = c("Xt","Yt"),  crs = 32720)
 
 ggplot(baseDatos) +
   annotation_map_tile(zoom = 10) +
+  geom_sf(data = limiteProv, fill = NA) +
   geom_sf(data = limiteProv) +
   geom_sf() + 
   annotation_scale(location = "br") + #, width_hint = 0.4) +
