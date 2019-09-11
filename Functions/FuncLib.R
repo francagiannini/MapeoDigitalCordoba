@@ -24,7 +24,7 @@ scalebar <- function (data = NULL, location = "bottomright", dist = NULL,
                       y.max = NULL, anchor = NULL, facet.var = NULL, facet.lev = NULL, 
                       st.inherit = TRUE) 
 {
-  browser()
+  # browser()
   if (is.null(data)) {
     if (is.null(x.min) | is.null(x.max) | is.null(y.min) | 
         is.null(y.max)) {
@@ -262,8 +262,8 @@ scalebar <- function (data = NULL, location = "bottomright", dist = NULL,
 theme_map <- function(p,...) {
   # browser()
   list(
-   scalebar(p,dist = 50, dist_unit = "Km",
-            transform = FALSE,height = 0.018, st.dist = 0.02, st.bottom = FALSE, st.size = 3) ,
+   scalebar(p,dist = 50, dist_unit = "Km",border.size = 1.2,
+            transform = FALSE,height = 0.018, st.dist = 0.02, st.bottom = TRUE, st.size = 5) ,
    # north(p,symbol = 10, scale = 0.15),
     # annotation_scale(location = "bl", bar_cols = c("black", "white"), 
     #                  line_width = 2, height = unit(0.25,"cm"),
@@ -294,7 +294,7 @@ theme_map <- function(p,...) {
     ylab("Latitud"),
     theme_minimal(),
     theme(
-      text = element_text(family = "Ubuntu Regular", color = "#22211d"),
+      text = element_text(size = 16,family = "Ubuntu Regular", color = "#22211d"),
       # axis.line = element_blank(),
       # axis.text.x = element_blank(),
       # axis.text.y = element_blank(),
