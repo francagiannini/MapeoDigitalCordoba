@@ -1,0 +1,25 @@
+file format : IDRISI Vector A.1
+file title  : Vector data imported from ArcView ShapeFile Type PolygonZ
+id type     : integer
+file type   : binary
+object type : polygon
+ref. system : plane
+ref. units  : m
+unit dist.  : 1
+min. X      : -65.771983797
+max. X      : -61.770893427
+min. Y      : -35.000134764
+max. Y      : -29.500422582
+pos'n error : unknown
+resolution  : unknown
+min. value  : 1
+max. value  : 1
+display min : 1
+display max : 1
+value units : classes
+value error : unknown
+flag value  : none
+flag def'n  : none
+legend cats : 0
+lineage     : This file was created by SHAPEIDR with the command line:
+lineage     : SHAPEIDR 1*C:\Users\Franca\Desktop\tele-sig\Vector\capas_250_IGN_CBA\prov_cba_cg.shp*C:\Users\Franca\Desktop\tele-sig\Vector\capas_250_IGN_CBA\lim_cba.vct*plane*m*1.0

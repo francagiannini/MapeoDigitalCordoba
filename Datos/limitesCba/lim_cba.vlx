@@ -1,0 +1,13 @@
+vector file : lim_cba
+database    : lim_cba
+file type   : access
+table       : lim_cba
+link field  : IDR_ID
+image cols  : 
+image rols  : 
+ref. system : 
+ref. units  : 
+min. X      : 
+max. X      : 
+min. Y      : 
+max. Y      : 
