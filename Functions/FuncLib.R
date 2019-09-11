@@ -4,6 +4,18 @@ library(ggspatial)
 library(ggmap)
 library(ggsn)
 
+
+dentroDe <- function(datos, limitesProvincia) {
+  estandentro <- function(x,y) {sapply(st_intersects(x,y), function(z) if (length(z)==0) F else T)}
+
+  
+  limitesProvincia <- st_transform(limitesProvincia, st_crs(datos))
+  # st_join(predichosModelos, limitesProvincia, join = st_within)
+  datos[estandentro(datos, limitesProvincia),]
+  
+}
+
+
 scalebar <- function (data = NULL, location = "bottomright", dist = NULL, 
                       dist_unit = NULL, transform = NULL, dd2km = NULL, model = NULL, 
                       height = 0.02, st.dist = 0.02, st.bottom = TRUE, st.size = 5, 
@@ -12,6 +24,7 @@ scalebar <- function (data = NULL, location = "bottomright", dist = NULL,
                       y.max = NULL, anchor = NULL, facet.var = NULL, facet.lev = NULL, 
                       st.inherit = TRUE) 
 {
+  browser()
   if (is.null(data)) {
     if (is.null(x.min) | is.null(x.max) | is.null(y.min) | 
         is.null(y.max)) {
@@ -242,6 +255,7 @@ scalebar <- function (data = NULL, location = "bottomright", dist = NULL,
                          size = st.size, color = st.color, inherit.aes = st.inherit)
   return(list(gg.box1, gg.box2, gg.legend))
 }
+
 
 
 
