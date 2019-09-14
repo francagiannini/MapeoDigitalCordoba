@@ -1,39 +1,75 @@
+#### Carga paquetes y funciones ----
 source("Functions/FuncLib.R")
 
-######
+#### Paramteros graficos
+GUARDARPLOT <- FALSE
+VERPLOT <- TRUE
+ANCHO <- 15.92
+ALTO <- 11
+#### Lectura de archivos -----
+limitesArg <- read_sf("Datos/limites_arg/PROVINCIAS.shp")
 limiteProv <- read_sf("Datos/provCba/prov_cba_cg.shp")
+
 muestreoSuelo <- read.table("Datos/suelos.txt", header = TRUE)
 muestreoSuelo <- st_as_sf(muestreoSuelo, coords = c("Xt","Yt"),  crs = 32720)
 
 
 ######
-predichosModelosAtrazina <- read.table("Datos/predichosModelos/pred_tmediavsKd_capIII_IV.txt", header = T)
-predichosModelosAtrazina <- st_as_sf(predichosModelosAtrazina, coords = c("Xt","Yt"),  crs = 32720)
-predichosModelosAtrazina <- dentroDe(predichosModelosAtrazina, limiteProv)
+predichosModelos <- read.table("Datos/predichosModelos/pre_todo.txt", header = T)
+predichosModelos <- st_as_sf(predichosModelos, coords = c("Xt","Yt"),  crs = 32720)
+predichosModelos <- dentroDe(predichosModelos, limiteProv)
 
+
+#### Puntos muestreo Plot ----
 muestreoPlot  <- ggplot(muestreoSuelo) +
-  # annotation_map_tile(zoom = 14) +
-  geom_sf(data = limiteProv, fill = NA, size = 0.4, color = "grey40") +
+  # annotation_map_tile(zoom = 17) +
+  geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
   geom_sf() +
   theme_map(muestreoSuelo)
-ggsave("Plots/muestreo.tiff",plot = muestreoPlot, device = "tiff", width = 17, height = 10, units = "cm")
 
-atrazinaPlot <- ggplot(predichosModelosAtrazina) +
-  # annotation_map_tile(zoom = 10) +
-  # geom_sf(data = limiteProv, fill = NA, size = 0.4, color = "grey40") +
-  geom_sf(aes(color = tmedia)) +
-  theme_map(predichosModelosAtrazina) +
-  scale_color_viridis_c(direction = -1) +
-  labs(color = "Vida media (días)")
+if(VERPLOT) muestreoPlot
+if(GUARDARPLOT) {ggsave("Plots/muestreo.tiff", plot = muestreoPlot, device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
 
-ggsave("Plots/tmedia.tiff",plot = atrazinaPlot, device = "tiff", width = 25, height = 33, units = "cm")
+
+# muestreoPlotMapa  <- ggplot(muestreoSuelo) +
+#   # annotation_map_tile(zoom = 17) +
+#   geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
+#   geom_sf() +
+#   theme_map(muestreoSuelo)
+# 
+# if(VERPLOT) muestreoPlotMapa
+# if(GUARDARPLOT) {ggsave("Plots/muestreoMapabg.tiff", plot =  muestreoPlotMapa, device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
+
+#### Puntos Predichos Plot Kda_t_ratio ----
+atrazinaPlot <- ggplot(predichosModelos) +
+  geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
+  geom_sf(aes(color = Kda)) +
+  theme_map(predichosModelos) +
+  scale_color_viridis_c(direction = -1)# +
+  # labs(color = "Vida media (días)")
+
+atrazinaPlotSD <-  ggplot(predichosModelos) +
+  geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
+  geom_sf(aes(color = sd_Kda)) +
+  theme_map(predichosModelos) +
+  scale_color_gradient( high = "#E129DB", low = "#F2F2F2")
+  scale_color_gradient2( low = "#E129DB", mid = "#E1297F", high = "#F2F2F2")
+  # scale_color_viridis_c(direction = -1)# +
+  # labs(color = "D.E. Vida media (días)")
+
+
+plotAtrazinaPredIC <- ggarrange(atrazinaPlot, atrazinaPlotSD,
+          ncol = 1)
+
+if(VERPLOT) plotAtrazinaPredIC
+if(GUARDARPLOT) {ggsave("Plots/plotAtrazinaPredIC.tiff", plot =  plotAtrazinaPredIC, device = "tiff", width = ANCHO, height = ALTO*2, units = "cm")}
 
 
 
 
 #####################################
 limitesArg <- read_sf("Datos/limites_arg/PROVINCIAS.shp")
-limitesArg[limitesArg$NAM == "CÓRDOBA", ]
+# limitesArg[limitesArg$NAM == "CÓRDOBA", ]
 
 datosCelia <- read.table("Datos/interpolacionCelia/CMAP_puntos.txt", sep = "\t", header = TRUE)
 datosCelia <- st_as_sf(datosCelia, coords = c("Xt","Yt"),  crs = 32720 )

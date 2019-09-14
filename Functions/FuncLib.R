@@ -3,7 +3,9 @@ library(ggplot2)
 library(ggspatial)
 library(ggmap)
 library(ggsn)
+library(ggpubr)
 
+windowsFonts(Times=windowsFont("TT Times New Roman"))
 
 dentroDe <- function(datos, limitesProvincia) {
   estandentro <- function(x,y) {sapply(st_intersects(x,y), function(z) if (length(z)==0) F else T)}
@@ -15,20 +17,19 @@ dentroDe <- function(datos, limitesProvincia) {
   
 }
 
+
 theme_map <- function(p,...) {
   # browser()
   list(
-   scalebar(p,dist = 50, dist_unit = "km",border.size = 1.2,
-            transform = FALSE,height = 0.018, st.dist = 0.02, st.bottom = TRUE, st.size = 5) ,
-   # north(p,symbol = 10, scale = 0.15),
-    # annotation_scale(location = "bl", bar_cols = c("black", "white"), 
-    #                  line_width = 2, height = unit(0.25,"cm"),
-    #                  pad_x = unit(0.25, "cm"), pad_y = unit(0.25, "cm"),
-    #                  text_pad = unit(0.15, "cm"), text_cex = 0.8, width_hint = 0.25),
+   scalebar(p,dist = 50, dist_unit = "km",border.size = 0.8,
+            transform = FALSE,height = 0.018, st.dist = 0.03, 
+            st.bottom = TRUE, st.size = 3,  family = "Times",
+            x.max = st_bbox(p)[3]-st_bbox(p)[3]*0.3) ,
     annotation_north_arrow(location = "tr", which_north = "grid",
-                           height = unit(1, "cm"), width = unit(0.75, "cm"),
+                           height = unit(0.75, "cm"), width = unit(0.56, "cm"),
                            style = north_arrow_orienteering(line_width = 1, line_col = "black",
-                                                            fill = c("white", "black"), text_col = "black", text_family = "",
+                                                            fill = c("white", "black"), text_col = "black",
+                                                            text_family = "Times",
                                                             text_face = NULL, text_size = 8, text_angle = 0)),
     scale_x_continuous(
       labels = function(x) {
@@ -48,15 +49,17 @@ theme_map <- function(p,...) {
     ylab("Latitud"),
     theme_minimal(),
     theme(
-      text = element_text(size = 23,family = "Ubuntu Regular", color = "#22211d"),
+      text = element_text(size = 12, family = "Times", color = "#22211d"),
       # panel.grid.minor = element_line(color = "#ebebe5", size = 0.2),
-      panel.grid.major = element_line(color = gray(0.5), size = 0.5, linetype = "dashed"),
+      panel.grid.major = element_line(color = gray(0.6), size = 0.3, linetype = "dashed"),
       panel.grid.minor = element_blank(),
       # plot.background = element_rect(fill = "#f5f5f2", color = NA), 
-      panel.background = element_rect(fill = "#f5f5f2", color = NA), 
-      legend.background = element_rect(fill = "#f5f5f2", color = NA),
+      panel.background = element_rect(fill = "#f5f5f5", color = NA), 
+      legend.background = element_rect(fill = "#f5f5f5", color = NA),
       panel.border = element_blank(),
       ...
-    )
+    ),
+     coord_sf(xlim = c(st_bbox(p)[1], st_bbox(p)[3]+st_bbox(p)[3]*0.02),
+               ylim = st_bbox(p)[c(2,4)])
   )
 }
