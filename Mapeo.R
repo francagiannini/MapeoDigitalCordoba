@@ -40,32 +40,177 @@ if(GUARDARPLOT) {ggsave("Plots/muestreo.tiff", plot = muestreoPlot, device = "ti
 # if(VERPLOT) muestreoPlotMapa
 # if(GUARDARPLOT) {ggsave("Plots/muestreoMapabg.tiff", plot =  muestreoPlotMapa, device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
 
-#### Puntos Predichos Plot Kda_t_ratio ----
-atrazinaPlot <- ggplot(predichosModelos) +
+#### Puntos Predichos Plot Kda ----
+kdaPredPlot <- ggplot(predichosModelos) +
   geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
   geom_sf(aes(color = Kda)) +
   theme_map(predichosModelos) +
   scale_color_viridis_c(direction = -1)# +
   # labs(color = "Vida media (días)")
 
-atrazinaPlotSD <-  ggplot(predichosModelos) +
+kdaPredPlotSD <-  ggplot(predichosModelos) +
   geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
   geom_sf(aes(color = sd_Kda)) +
   theme_map(predichosModelos) +
-  scale_color_gradient( high = "#E129DB", low = "#F2F2F2")
-  scale_color_gradient2( low = "#E129DB", mid = "#E1297F", high = "#F2F2F2")
-  # scale_color_viridis_c(direction = -1)# +
+  scale_color_viridis_c(direction = -1, option = "inferno")# +
   # labs(color = "D.E. Vida media (días)")
 
+kdaPredPlotIC95 <-  ggplot(predichosModelos) +
+  geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
+  geom_sf(aes(color = IC95_Kda)) +
+  theme_map(predichosModelos) +
+  scale_color_viridis_c(direction = -1, option = "cividis")# +
+# labs(color = "D.E. Vida media (días)")
 
-plotAtrazinaPredIC <- ggarrange(atrazinaPlot, atrazinaPlotSD,
-          ncol = 1)
+plotKdaPredSD <- ggarrange(kdaPredPlot, kdaPredPlotSD,
+                                ncol = 1)
 
-if(VERPLOT) plotAtrazinaPredIC
-if(GUARDARPLOT) {ggsave("Plots/plotAtrazinaPredIC.tiff", plot =  plotAtrazinaPredIC, device = "tiff", width = ANCHO, height = ALTO*2, units = "cm")}
+if(VERPLOT) plotKdaPredSD
+if(GUARDARPLOT) {ggsave("Plots/Kda_Pred_SD.tiff", plot =  plotKdaPredSD, device = "tiff", width = ANCHO, height = ALTO*2, units = "cm")}
+
+plotKdaPredICSD <- ggarrange(kdaPredPlot, kdaPredPlotSD, kdaPredPlotIC95,
+                                  ncol = 2, nrow = 2)
+if(VERPLOT) plotKdaPredICSD
+if(GUARDARPLOT) {ggsave("Plots/Kda_Pred_SD_IC.tiff", plot =  plotKdaPredICSD, device = "tiff", width = ANCHO, height = ALTO*2, units = "cm")}
 
 
 
+#### Puntos Predichos Plot Kdg ----
+KdgPredPlot <- ggplot(predichosModelos) +
+  geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
+  geom_sf(aes(color = Kdg)) +
+  theme_map(predichosModelos) +
+  scale_color_viridis_c(direction = -1)# +
+# labs(color = "Vida media (días)")
+
+KdgPredPlotSD <-  ggplot(predichosModelos) +
+  geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
+  geom_sf(aes(color = sd_Kdg)) +
+  theme_map(predichosModelos) +
+  scale_color_viridis_c(direction = -1, option = "inferno")# +
+# labs(color = "D.E. Vida media (días)")
+
+KdgPredPlotIC95 <-  ggplot(predichosModelos) +
+  geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
+  geom_sf(aes(color = IC95_Kdg)) +
+  theme_map(predichosModelos) +
+  scale_color_viridis_c(direction = -1, option = "cividis")# +
+# labs(color = "D.E. Vida media (días)")
+
+plotKdgPredSD <- ggarrange(KdgPredPlot, KdgPredPlotSD,
+                              ncol = 1)
+
+if(VERPLOT) plotKdgPredSD
+if(GUARDARPLOT) {ggsave("Plots/Kdga_Pred_SD.tiff", plot =  plotKdgPredSD, device = "tiff", width = ANCHO, height = ALTO*2, units = "cm")}
+
+plotKdgPredICSD <- ggarrange(KdgPredPlot, KdgPredPlotSD, KdgPredPlotIC95,
+                                ncol = 2, nrow = 2)
+if(VERPLOT) plotKdgPredICSD
+if(GUARDARPLOT) {ggsave("Plots/Kdg_Pred_SD_IC.tiff", plot =  plotKdgPredICSD, device = "tiff", width = ANCHO, height = ALTO*2, units = "cm")}
+
+
+#### Puntos Predichos Plot tmedia ----
+tmediaPredPlot <- ggplot(predichosModelos) +
+  geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
+  geom_sf(aes(color = tmedia)) +
+  theme_map(predichosModelos) +
+  scale_color_viridis_c(direction = -1)# +
+# labs(color = "Vida media (días)")
+
+tmediaPredPlotSD <-  ggplot(predichosModelos) +
+  geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
+  geom_sf(aes(color = sd_tmedia)) +
+  theme_map(predichosModelos) +
+  scale_color_viridis_c(direction = -1, option = "inferno")# +
+# labs(color = "D.E. Vida media (días)")
+
+tmediaPredPlotIC95 <-  ggplot(predichosModelos) +
+  geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
+  geom_sf(aes(color = IC95_tmedia)) +
+  theme_map(predichosModelos) +
+  scale_color_viridis_c(direction = -1, option = "cividis")# +
+# labs(color = "D.E. Vida media (días)")
+
+plottmediaPredSD <- ggarrange(tmediaPredPlot, tmediaPredPlotSD,
+                           ncol = 1)
+
+if(VERPLOT) plottmediaPredSD
+if(GUARDARPLOT) {ggsave("Plots/tmedia_Pred_SD.tiff", plot =  plottmediaPredSD, device = "tiff", width = ANCHO, height = ALTO*2, units = "cm")}
+
+plottmediaPredICSD <- ggarrange(tmediaPredPlot, tmediaPredPlotSD, tmediaPredPlotIC95,
+                             ncol = 2, nrow = 2)
+if(VERPLOT) plottmediaPredICSD
+if(GUARDARPLOT) {ggsave("Plots/tmedia_Pred_SD_IC.tiff", plot =  plottmediaPredICSD, device = "tiff", width = ANCHO, height = ALTO*2, units = "cm")}
+
+
+
+
+#### Puntos Predichos GUS ----
+GUSPredPlot <- ggplot(predichosModelos) +
+  geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
+  geom_sf(aes(color = GUS)) +
+  theme_map(predichosModelos) +
+  scale_color_viridis_c(direction = -1)# +
+# labs(color = "Vida media (días)")
+
+
+
+if(VERPLOT) GUSPredPlot
+if(GUARDARPLOT) {ggsave("Plots/GUSPredPlot_Pred.tiff", plot =  GUSPredPlot, device = "tiff", width = ANCHO, height = ALTO*2, units = "cm")}
+
+
+#### Puntos Predichos Kda_t_ratio  ----
+Kda_t_ratioPredPlot <- ggplot(predichosModelos) +
+  geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
+  geom_sf(aes(color = Kda_t_ratio)) +
+  theme_map(predichosModelos) +
+  scale_color_viridis_c(direction = -1)# +
+# labs(color = "Vida media (días)")
+
+
+
+if(VERPLOT) Kda_t_ratioPredPlot
+if(GUARDARPLOT) {ggsave("Plots/Kda_t_ratioPredPlot_Pred.tiff", plot =  Kda_t_ratioPredPlot, device = "tiff", width = ANCHO, height = ALTO*2, units = "cm")}
+
+# Capítulo VI
+# Mapa Zonas sobre KOCa
+# Mapa Zonas sobre KOCg 
+# Mapa Zonas sobre vida media
+# Mapa Zonas sobre GUS
+# Mapa Zonas sobre KOCa 
+# Mapa catKOCa ----
+CATKOCaPredPlot <- ggplot(predichosModelos) +
+  geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
+  geom_sf(aes(color = CATKOCa)) +
+  theme_map(predichosModelos) +
+  scale_color_viridis_d(direction = -1)# +
+# labs(color = "Vida media (días)")
+
+if(VERPLOT) CATKOCaPredPlot
+if(GUARDARPLOT) {ggsave("Plots/CATKOCaPredPlot_Pred.tiff", plot =  CATKOCaPredPlot, device = "tiff", width = ANCHO, height = ALTO*2, units = "cm")}
+
+
+# Mapa catKOCg  ----
+# Mapa catvidamedia ----
+# Mapa catGUS ----
+CATGUSPredPlot <- ggplot(predichosModelos) +
+  geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
+  geom_sf(aes(color = CATGUS)) +
+  theme_map(predichosModelos) +
+  scale_color_viridis_d(direction = -1)# +
+# labs(color = "Vida media (días)")
+
+if(VERPLOT) CATGUSPredPlot
+if(GUARDARPLOT) {ggsave("Plots/CATGUSPredPlot_Pred.tiff", plot =  CATGUSPredPlot, device = "tiff", width = ANCHO, height = ALTO*2, units = "cm")}
+
+
+
+# Mapa limitante dren ----
+# Mapa pp ----
+# Mapa vientos ----
+# Mapa riesgo erosión hidrica ----
+# Mapa riesgo de erosión eólica ----
+# Mapa presencia de bt ----
 
 #####################################
 limitesArg <- read_sf("Datos/limites_arg/PROVINCIAS.shp")

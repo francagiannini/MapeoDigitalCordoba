@@ -5,6 +5,8 @@ library(ggmap)
 library(ggsn)
 library(ggpubr)
 
+options(OutDec= ",")
+
 windowsFonts(Times=windowsFont("TT Times New Roman"))
 
 dentroDe <- function(datos, limitesProvincia) {
@@ -35,14 +37,16 @@ theme_map <- function(p,...) {
       labels = function(x) {
         pos <- sign(x) + 2
         dir <- c("O", "", "E")
-        tout <- paste0(abs(x), "\u00b0", dir[pos])
+         x <- format(abs(x), big.mark = ".", small.mark = ",", scientific = FALSE)
+        tout <- paste0(x, "\u00b0", dir[pos])
         tout
       }),
     scale_y_continuous(
       labels = function(x) {
         pos <- sign(x) + 2
         dir <- c("S", "", "N")
-        tout <- paste0(abs(x), "\u00b0", dir[pos])
+        x <- format(abs(x), big.mark = ".", small.mark = ",", scientific = FALSE)
+        tout <- paste0(x, "\u00b0", dir[pos])
         tout
       }),
     xlab("Longitud"), 
