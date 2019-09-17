@@ -270,6 +270,11 @@ zonasKdT_multispati_Plot <- ggplot(zonasCap5) +
   scale_fill_viridis_d(direction = -1, option = "inferno", begin = 0.4) +
   labs(color = "Zonas", fill = "Zonas")
 
+if(VERPLOT) zonasKdT_multispati_Plot
+if(GUARDARPLOT) {ggsave("Plots/zonas_Kdt_Plot.tiff", plot =  zonasKdT_multispati_Plot,
+                        device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
+
+
 
 zonasKoc_multispati_Plot <- ggplot(zonasCap5) +
   geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
@@ -279,13 +284,8 @@ zonasKoc_multispati_Plot <- ggplot(zonasCap5) +
   scale_fill_viridis_d(direction = -1, option = "inferno", begin = 0.4) +
   labs(color = "Zonas", fill = "Zonas")
 
-
-zonas_Kdt_Koc_plot <- ggarrange(zonasKdT_multispati_Plot, zonasKoc_multispati_Plot,
-          ncol = 2)
-
-
-if(VERPLOT) zonas_Kdt_Koc_plot
-if(GUARDARPLOT) {ggsave("Plots/zonas_Kdt_Koc_Plot.tiff", plot =  zonas_Kdt_Koc_plot,
+if(VERPLOT) zonasKoc_multispati_Plot
+if(GUARDARPLOT) {ggsave("Plots/zonas_Koc_Plot.tiff", plot =  zonasKoc_multispati_Plot,
                         device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
 
 # Mapa Lisa ----
