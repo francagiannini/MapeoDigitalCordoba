@@ -24,6 +24,21 @@ predichosModelos$CATGUS <- factor(predichosModelos$CATGUS, levels = c("Alto", "M
 predichosModelos$CATtmedia <- factor(predichosModelos$CATtmedia, levels = c("Alta", "Media", "Baja"))
 predichosModelos$CATKOCg <- factor(predichosModelos$CATKOCg, levels = c("Elevado", "Moderado", "Débil"))
 
+zonasCap5 <- read.table("Datos/zonas_cap_5.txt", header = TRUE, sep = "\t")
+zonasCap5 <- st_as_sf(zonasCap5, coords = c("Xt","Yt"),  crs = 32720)
+zonasCap5$Patron <- factor(zonasCap5$Patron, 
+                           levels = c("Alto Kd y Alta vida media",
+                                    "Alto Kd y baja vida media",
+                                    "Baja Kd y Baja vida media",
+                                    "Bajo Kd y Alta vida media",
+                                    "No significativa"),
+                           labels = c("Alto Kd y Alta vida media",
+                                      "Alto Kd y Baja vida media",
+                                      "Bajo Kd y Baja vida media",
+                                      "Bajo Kd y Alta vida media",
+                                      "No significativa"))
+
+
 #### CAPITULO 1 ====
 #### Puntos muestreo Plot ----
 muestreoPlot  <- ggplot(muestreoSuelo) +
@@ -232,6 +247,63 @@ if(GUARDARPLOT) {ggsave("Plots/GUS_Pred.tiff", plot =  GUSPredPlot, device = "ti
 
 
 # Mapa Lisa ----
+lisaPredPlot <- ggplot(zonasCap5) +
+  geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
+  geom_sf(aes(color =  Patron, fill =  Patron)) +
+  theme_map(zonasCap5) +
+  scale_color_viridis_d(direction = -1, option = "inferno") +
+  scale_fill_viridis_d(direction = -1, option = "inferno")# +
+# labs(color = "Vida media (días)")
+
+
+
+if(VERPLOT) lisaPredPlot
+if(GUARDARPLOT) {ggsave("Plots/lisaPlot.tiff", plot =  lisaPredPlot,
+                        device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
+
+# Mapa ZonaMultsipatiKd_t ----
+zonasKdT_multispati_Plot <- ggplot(zonasCap5) +
+  geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
+  geom_sf(aes(color =  Zonas_multispat_kd_t, fill =  Zonas_multispat_kd_t)) +
+  theme_map(zonasCap5) +
+  scale_color_viridis_d(direction = -1, option = "inferno", begin = 0.4) +
+  scale_fill_viridis_d(direction = -1, option = "inferno", begin = 0.4) +
+  labs(color = "Zonas", fill = "Zonas")
+
+
+zonasKoc_multispati_Plot <- ggplot(zonasCap5) +
+  geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
+  geom_sf(aes(color =  Zonas_multispati_koc_t, fill =  Zonas_multispati_koc_t)) +
+  theme_map(zonasCap5) +
+  scale_color_viridis_d(direction = -1, option = "inferno", begin = 0.4) +
+  scale_fill_viridis_d(direction = -1, option = "inferno", begin = 0.4) +
+  labs(color = "Zonas", fill = "Zonas")
+
+
+zonas_Kdt_Koc_plot <- ggarrange(zonasKdT_multispati_Plot, zonasKoc_multispati_Plot,
+          ncol = 2)
+
+
+if(VERPLOT) zonas_Kdt_Koc_plot
+if(GUARDARPLOT) {ggsave("Plots/zonas_Kdt_Koc_Plot.tiff", plot =  zonas_Kdt_Koc_plot,
+                        device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
+
+# Mapa Lisa ----
+lisaPredPlot <- ggplot(zonasCap5) +
+  geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
+  geom_sf(aes(color =  Patron, fill =  Patron)) +
+  theme_map(zonasCap5) +
+  scale_color_viridis_d(direction = -1, option = "inferno") +
+  scale_fill_viridis_d(direction = -1, option = "inferno")# +
+# labs(color = "Vida media (días)")
+
+
+
+if(VERPLOT) lisaPredPlot
+if(GUARDARPLOT) {ggsave("Plots/lisaPlot.tiff", plot =  lisaPredPlot,
+                        device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
+
+
 # Mapa Kdt ratio ---- 
 Kda_t_ratioPredPlot <- ggplot(predichosModelos) +
   geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
