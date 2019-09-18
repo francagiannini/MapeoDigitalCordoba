@@ -112,37 +112,37 @@ cartasSuelos<- st_transform(cartasSuelos, st_crs(predichosModelos))
 # levels(factor(cartasSuelos$Ggru_1d))
 
 
+#### DEM y Cursos Agua
+
+limiteCba <- limitesArg[limitesArg$NAM == "CÓRDOBA",]
+elevation <- raster("Datos/DEM_yderivados_cba/dtm_elevation_merit.dem_m_250m_s0..0cm_2017_v1.0.tif")
+
+elevation <- crop(elevation, st_transform(limiteCba,st_crs(elevation)))
+elevation <- mask(elevation,st_zm(limiteCba))
+elevation <- projectRaster(elevation, crs = st_crs(predichosModelos)$proj4string)
+
+rastersf <- st_as_sf(gplot_data(elevation), coords = c("x","y"), crs = crs(elevation))
+rastersf <- rastersf[ !is.na(rastersf$value), ]
+rastersf <- st_transform(rastersf, st_crs(predichosModelos))
+
+cuerposAguaMuestra <- cuerposAgua[sample(nrow(cuerposAgua), 200) , ]
+elevationMuestra <- rastersf[sample(nrow(rastersf), 200) , ]
 
 
-####
+limiteCbaTrans <- st_transform(limiteCba, st_crs(predichosModelos))
 
 
-
-library(raster)
-
-Prec <- raster("Datos/Prueba/wc2.0_bio_10m_04.tif")
-
-PrecProv <- crop(Prec, limiteProv)
-
-mapview::mapview(PrecProv)
-
-st_intersection(archivoSf, recorte)
-plot(Prec)
-plot(crop(Prec, limiteProv))
-
-Recorte <- mask(crop(Prec, st_transform(predichosModelos,st_crs(Prec))), st_transform(predichosModelos,st_crs(Prec)))
-
-library(mapview)
-mapview(Recorte)
-extent(limiteProv)
-ggplot(Prec) +
-  geom_raster()
+DEMPlot <- ggplot() +
+  geom_sf(data=limiteCbaTrans) +
+  geom_sf(data = rastersf, aes(color= value)) +
+  theme_map(limiteCbaTrans) +
+  scale_colour_gradientn(colours = terrain.colors(10)) +
+  labs(color = "Elevación")
 
 
-bang_sp <- as(bangladesh, 'Spatial')
-
-
-
+if(VERPLOT) DEMPlot
+if(GUARDARPLOT) {ggsave("Plots/DEM.tiff", plot = DEMPlot, 
+                        device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
 
 
 #### CAPITULO 1 ====
@@ -653,14 +653,13 @@ if(GUARDARPLOT) {ggsave("Plots/ErosionEolica.tiff", plot =  erosionEolicaPlot,
 
 ### LISA y ErosionEolica ----
 
-
-ggplot(zonasCap5) +
-  geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
-  geom_sf(data = riesgoEE, aes(color = CLASE_EP, fill = CLASE_EP), size = "EE", alpha = 0.9)  + 
-  geom_sf(aes(color =  Patron, fill =  Patron), alpha = 0.2) +
-  theme_map(zonasCap5) +
-  scale_fill_viridis_d(aesthetics = c("color", "fill")) +
-  scale_fill_viridis_d(aesthetics = c("size"))
+# ggplot(zonasCap5) +
+#   geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
+#   geom_sf(data = riesgoEE, aes(color = CLASE_EP, fill = CLASE_EP), alpha = 0.9)  + 
+#   geom_sf(aes(color =  Patron, fill =  Patron), alpha = 0.2) +
+#   theme_map(zonasCap5) +
+#   scale_fill_viridis_d(aesthetics = c("color", "fill")) +
+#   scale_fill_viridis_d(aesthetics = c("size"))
 
 
 

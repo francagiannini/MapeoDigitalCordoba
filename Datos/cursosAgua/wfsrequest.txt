@@ -1,0 +1,1 @@
+http://idecor-ws.mapascordoba.gob.ar:80/geoserver/idecor/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=idecor:cursos_agua&outputFormat=SHAPE-ZIP
