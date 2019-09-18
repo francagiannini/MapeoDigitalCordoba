@@ -244,6 +244,17 @@ scalebar <- function (data = NULL, location = "bottomright", dist = NULL,
 }
 
 
+LeerRecortTransf <- function(archivo, 
+                             recorte = limitesArg[limitesArg$NAM == "CÓRDOBA",], 
+                             crs = st_crs(predichosModelos), ...) {
+  
+  archivoSf <- read_sf(archivo, ...)
+  archivoSf <- st_intersection(archivoSf, recorte)
+  archivoSf <- st_transform(archivoSf, crs)
+  return(archivoSf)
+  
+}
+
 
 dentroDe <- function(datos, limitesProvincia) {
   estandentro <- function(x,y) {sapply(st_intersects(x,y), function(z) if (length(z)==0) F else T)}
@@ -257,6 +268,8 @@ dentroDe <- function(datos, limitesProvincia) {
 
 
 theme_map <- function(p,...) {
+  
+  if(st_crs(p)$epsg != 32720) {warning("Puede haber errores de escalas debido a que epsg != 32720")}
   # browser()
   list(
    scalebar(p,dist = 50, dist_unit = "km",border.size = 0.8,

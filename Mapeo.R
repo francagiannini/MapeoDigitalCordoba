@@ -38,6 +38,112 @@ zonasCap5$Patron <- factor(zonasCap5$Patron,
                                       "Bajo Kd y Alta vida media",
                                       "No significativa"))
 
+# Datos erosion eolica Uso suelo
+
+riesgoEE <- LeerRecortTransf("Datos/riesgo/EE_Pot_1950-2000_wgs84/")
+riesgoEE$CLASE_EP <- factor(riesgoEE$CLASE_EP, 
+                            levels = c(">150",
+                                       "100-150",              
+                                       "50-100",
+                                       "20-50",
+                                       "8-20",
+                                       "0-8"
+                            ))
+UsoSuelo <- LeerRecortTransf("Datos/riesgo/LUS_v2_n2/LUS_v2_n2.shp")
+
+# Lectura Limitantes
+limitantes <- read_sf("Datos/riesgo/limitantes/limitantes_edaficas.shp", options = "ENCODING=ISO-8859-1")
+limitantes <- st_transform(limitantes, st_crs(predichosModelos))
+
+subSetlimitantes <- limitantes[!limitantes$textura %in% c(
+  # "Areno franco en superficie Ud",   
+  # "Areno franco en superficie Us",   
+  # "Arenoso en superficie Ud",        
+  # "Arenoso en superficie Us",       
+  "Bañados y lagunas",            
+  "Capital",                         
+  # "Franco arenoso en superficie Ud", 
+  # "Franco arenoso en superficie Us",
+  # "Franco en superficie Ud",         
+  # "Franco en superficie Us",         
+  # "Franco limoso en superficie Ud", 
+  # "Franco limoso en superficie Us",
+  "Lagunas",
+  "Médanos",
+  "Roca",
+  "Salinas"               
+), ]
+
+subSetlimitantes$drenaje <- factor(subSetlimitantes$drenaje, levels = c("Excesivamente drenado",
+                                                                        "Algo excesivamente drenado",
+                                                                        "Bien a algo excesivamente drenado",
+                                                                        "Bien drenado",
+                                                                        "Moderadamente bien drenado",
+                                                                        "Imperfectamente drenado",
+                                                                        "Pobremente drenado",
+                                                                        "Muy pobremente drenado"))
+
+
+
+subSetlimitantes$alcalinida <- factor(subSetlimitantes$alcalinida, levels = c("No sódico",
+                                                                              "Levemente sódico",
+                                                                              "Sódico en profundidad",
+                                                                              "Sódico en el subsuelo",
+                                                                              "Sódico desde superficie"))
+
+
+
+subSetlimitantes$prof_efect <- factor(subSetlimitantes$prof_efect, levels = c("Muy somero (< de 30 cm)",
+                                                                              "Somero (60-30 cm)",
+                                                                              "Algo somero (90-60 cm)",
+                                                                              "Poco profundo (120- 90 cm)",
+                                                                              "Profundo (> de 120 cm)"))
+
+
+subSetlimitantes$salinidad <- factor(subSetlimitantes$salinidad, levels = c("Fuertemente salino",
+                                                                            "Moderadamente salino",
+                                                                            "Levemente salino",
+                                                                            "No salino"))  
+
+
+### Cartas suelos
+cartasSuelos <- read_sf("Datos/cartas_suelos_cba/Suelos_geointa_f4.shp")
+cartasSuelos<- st_transform(cartasSuelos, st_crs(predichosModelos))
+# levels(factor(cartasSuelos$Ggru_1d))
+
+
+
+
+####
+
+
+
+library(raster)
+
+Prec <- raster("Datos/Prueba/wc2.0_bio_10m_04.tif")
+
+PrecProv <- crop(Prec, limiteProv)
+
+mapview::mapview(PrecProv)
+
+st_intersection(archivoSf, recorte)
+plot(Prec)
+plot(crop(Prec, limiteProv))
+
+Recorte <- mask(crop(Prec, st_transform(predichosModelos,st_crs(Prec))), st_transform(predichosModelos,st_crs(Prec)))
+
+library(mapview)
+mapview(Recorte)
+extent(limiteProv)
+ggplot(Prec) +
+  geom_raster()
+
+
+bang_sp <- as(bangladesh, 'Spatial')
+
+
+
+
 
 #### CAPITULO 1 ====
 #### Puntos muestreo Plot ----
@@ -293,8 +399,11 @@ lisaPredPlot <- ggplot(zonasCap5) +
   geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
   geom_sf(aes(color =  Patron, fill =  Patron)) +
   theme_map(zonasCap5) +
-  scale_color_viridis_d(direction = -1, option = "inferno") +
-  scale_fill_viridis_d(direction = -1, option = "inferno")# +
+  scale_color_manual(
+    values = c(scales::viridis_pal(option = "inferno", direction = -1)(5)[-5], "grey70" ),
+    breaks = levels(zonasCap5$Patron),
+    aesthetics = c("colour", "fill")
+    )
 # labs(color = "Vida media (días)")
 
 
@@ -416,20 +525,160 @@ CATGUSPredPlot <- ggplot(predichosModelos) +
   geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
   geom_sf(aes(color = CATGUS, fill = CATGUS)) +
   theme_map(predichosModelos) +
-  scale_color_viridis_d(direction = -1, option = "inferno") +
-  scale_fill_viridis_d(direction = -1, option = "inferno") + 
-  labs(color = "Vida media (días)")
+  scale_color_viridis_d(direction = 1, option = "inferno", begin = 0.4) +
+  scale_fill_viridis_d(direction = 1, option = "inferno", begin = 0.4) + 
+  labs(color = "GUS", fill = "GUS")
 
 if(VERPLOT) CATGUSPredPlot
 if(GUARDARPLOT) {ggsave("Plots/CATGUSPredPlot_Pred.tiff", plot =  CATGUSPredPlot,
                         device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
 
+# Mapa carta suelo ----
 
-# Mapa limitante dren ----
+
+cartaSueloPlot <- ggplot(cartasSuelos) +
+  geom_sf(aes(color = Ggru_1d, fill = Ggru_1d)) +
+  geom_sf(data = limitesArg, fill = NA) +  
+  theme_map(cartasSuelos) + 
+  scale_fill_viridis_d(aesthetics = c("color", "fill"), end = 0.9, direction = -1, na.translate=FALSE) +
+  labs(color = "Suelo", fill = "Suelo")
+
+if(VERPLOT) cartaSueloPlot
+if(GUARDARPLOT) {ggsave("Plots/CartaSuelo.tiff", plot = cartaSueloPlot, 
+                        device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
+
+
+# Mapa limitante textura ----
+
+
+
+texturaLimitantesPlot <- ggplot(subSetlimitantes) +
+  geom_sf(aes(color = textura, fill = textura)) +
+  geom_sf(data = limitesArg, fill = NA) +  
+  theme_map(subSetlimitantes) + 
+  scale_fill_viridis_d(aesthetics = c("color", "fill"), end = 0.9, direction = -1) +
+  labs(color = "Textura", fill = "Textura")
+
+if(VERPLOT) texturaLimitantesPlot
+if(GUARDARPLOT) {ggsave("Plots/texturaLimitante.tiff", plot =  texturaLimitantesPlot,
+                        device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
+
+# Mapa limitante drenaje ----
+drenajeLimitante <- ggplot(subSetlimitantes) +
+  geom_sf(aes(color = drenaje, fill = drenaje)) +
+  geom_sf(data = limitesArg, fill = NA) +  
+  theme_map(subSetlimitantes) + 
+  scale_fill_viridis_d(aesthetics = c("color", "fill"), end = 0.9, direction = -1) +
+  labs(color = "Drenaje", fill = "Drenaje")
+
+if(VERPLOT) drenajeLimitante
+if(GUARDARPLOT) {ggsave("Plots/drenajeLimitante.tiff", plot =  drenajeLimitante,
+                        device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
+
+# Mapa limitante alcalinida ----
+alcalinidadLimitante <- ggplot(subSetlimitantes) +
+  geom_sf(aes(color = alcalinida, fill = alcalinida)) +
+  geom_sf(data = limitesArg, fill = NA) +  
+  theme_map(subSetlimitantes) + 
+  scale_fill_viridis_d(aesthetics = c("color", "fill"), end = 0.9, direction = -1) +
+  labs(color = "Alcalinidad", fill = "Alcalinidad")
+
+if(VERPLOT) alcalinidadLimitante
+if(GUARDARPLOT) {ggsave("Plots/alcalinidadLimitante.tiff", plot =  alcalinidadLimitante,
+                        device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
+
+
+# Mapa limitante prof_efect ----
+prof_efectLimitante <- ggplot(subSetlimitantes) +
+  geom_sf(aes(color = prof_efect, fill = prof_efect)) +
+  geom_sf(data = limitesArg, fill = NA) +  
+  theme_map(subSetlimitantes) + 
+  scale_fill_viridis_d(aesthetics = c("color", "fill"), end = 0.9, direction = -1) +
+  labs(color = "Profundidad", fill = "Profundidad")
+
+if(VERPLOT) prof_efectLimitante
+if(GUARDARPLOT) {ggsave("Plots/prof_efectLimitante.tiff", plot =  prof_efectLimitante,
+                        device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
+
+
+
+
+# Mapa limitante salinidad ----
+salinidadLimitante <- ggplot(subSetlimitantes) +
+  geom_sf(aes(color = salinidad, fill = salinidad)) +
+  geom_sf(data = limitesArg, fill = NA) +  
+  theme_map(subSetlimitantes) + 
+  scale_fill_viridis_d(aesthetics = c("color", "fill"), end = 0.9, direction = -1) +
+  labs(color = "Salinidad", fill = "Salinidad")
+
+if(VERPLOT) salinidadLimitante
+if(GUARDARPLOT) {ggsave("Plots/salinidadLimitante.tiff", plot =  salinidadLimitante,
+                        device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
+
+
+
+
+
+
 # Mapa pp ----
 # Mapa vientos ----
 # Mapa riesgo erosión hidrica ----
+
 # Mapa riesgo de erosión eólica ----
+
+
+erosionEolicaPlot <- ggplot(riesgoEE) +
+  geom_sf(aes(color = CLASE_EP, fill = CLASE_EP)) +
+  geom_sf(data = limitesArg, fill = NA) + 
+  theme_map(riesgoEE) + 
+  scale_fill_viridis_d(aesthetics = c("color", "fill")) +
+  labs(color = "Erosión Eólica", fill = "Erosión Eólica")
+
+if(VERPLOT) erosionEolicaPlot
+if(GUARDARPLOT) {ggsave("Plots/ErosionEolica.tiff", plot =  erosionEolicaPlot,
+                        device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
+
+# Mapa LISA y Erosion
+erosionEolicaPlot <- ggplot(riesgoEE) +
+  
+  geom_sf(data = limitesArg, fill = NA) + 
+  theme_map(riesgoEE) + 
+  scale_fill_viridis_d(aesthetics = c("color", "fill")) +
+  labs(color = "Erosión Eólica", fill = "Erosión Eólica")
+
+if(VERPLOT) erosionEolicaPlot
+if(GUARDARPLOT) {ggsave("Plots/ErosionEolica.tiff", plot =  erosionEolicaPlot,
+                        device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
+
+
+### LISA y ErosionEolica ----
+
+
+ggplot(zonasCap5) +
+  geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
+  geom_sf(data = riesgoEE, aes(color = CLASE_EP, fill = CLASE_EP), size = "EE", alpha = 0.9)  + 
+  geom_sf(aes(color =  Patron, fill =  Patron), alpha = 0.2) +
+  theme_map(zonasCap5) +
+  scale_fill_viridis_d(aesthetics = c("color", "fill")) +
+  scale_fill_viridis_d(aesthetics = c("size"))
+
+
+
+# Mapa Uso de Suelo ----
+
+
+
+usoSueloPlot <- ggplot(UsoSuelo) +
+  geom_sf(aes(color = Nivel_1, fill = Nivel_1)) +
+  geom_sf(data = limitesArg, fill = NA) + 
+  theme_map(UsoSuelo) + 
+  scale_fill_viridis_d(aesthetics = c("color", "fill")) +
+  labs(color = "Usos", fill = "Usos")
+
+if(VERPLOT) usoSueloPlot
+if(GUARDARPLOT) {ggsave("Plots/UsoSuelo.tiff", plot =  usoSueloPlot,
+                        device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
+
 # Mapa presencia de bt ----
 
 

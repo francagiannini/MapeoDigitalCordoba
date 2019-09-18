@@ -1,0 +1,1 @@
+http://mapas.desertificacion.gob.ar/wfs?access_token=dUZsEKaorABDjAZSHfcOHdmTGLi2YZ?format_options=charset%3AUTF-8&typename=geonode%3Aeh_potencial_sp&outputFormat=SHAPE-ZIP&version=1.0.0&service=WFS&request=GetFeature&access_token=dUZsEKaorABDjAZSHfcOHdmTGLi2YZ
