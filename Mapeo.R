@@ -24,6 +24,8 @@ predichosModelos$CATGUS <- factor(predichosModelos$CATGUS, levels = c("Alto", "M
 predichosModelos$CATtmedia <- factor(predichosModelos$CATtmedia, levels = c("Alta", "Media", "Baja"))
 predichosModelos$CATKOCg <- factor(predichosModelos$CATKOCg, levels = c("Elevado", "Moderado", "Débil"))
 
+
+
 zonasCap5 <- read.table("Datos/zonas_cap_5.txt", header = TRUE, sep = "\t")
 zonasCap5 <- st_as_sf(zonasCap5, coords = c("Xt","Yt"),  crs = 32720)
 zonasCap5$Patron <- factor(zonasCap5$Patron, 
@@ -37,6 +39,18 @@ zonasCap5$Patron <- factor(zonasCap5$Patron,
                                       "Bajo Kd y Baja vida media",
                                       "Bajo Kd y Alta vida media",
                                       "No significativa"))
+
+
+zonasCap5$Zonas_multispat_kd_t <- factor(zonasCap5$Zonas_multispat_kd_t, 
+                           levels = c( "NO", "S","E", "SA"),
+                           labels = c( "I", "II","III", "IV"))
+
+
+zonasCap5$Zonas_multispati_koc_t <- factor(zonasCap5$Zonas_multispati_koc_t, 
+                                         levels = c( "NO", "S","E", "SA"),
+                                         labels = c( "I", "II","III", "IV"))
+
+
 
 # Datos erosion eolica Uso suelo
 
@@ -111,40 +125,134 @@ cartasSuelos <- read_sf("Datos/cartas_suelos_cba/Suelos_geointa_f4.shp")
 cartasSuelos<- st_transform(cartasSuelos, st_crs(predichosModelos))
 # levels(factor(cartasSuelos$Ggru_1d))
 
-
-#### DEM y Cursos Agua
-
-limiteCba <- limitesArg[limitesArg$NAM == "CÓRDOBA",]
-elevation <- raster("Datos/DEM_yderivados_cba/dtm_elevation_merit.dem_m_250m_s0..0cm_2017_v1.0.tif")
-
-elevation <- crop(elevation, st_transform(limiteCba,st_crs(elevation)))
-elevation <- mask(elevation,st_zm(limiteCba))
-elevation <- projectRaster(elevation, crs = st_crs(predichosModelos)$proj4string)
-
-rastersf <- st_as_sf(gplot_data(elevation), coords = c("x","y"), crs = crs(elevation))
-rastersf <- rastersf[ !is.na(rastersf$value), ]
-rastersf <- st_transform(rastersf, st_crs(predichosModelos))
-
-cuerposAguaMuestra <- cuerposAgua[sample(nrow(cuerposAgua), 200) , ]
-elevationMuestra <- rastersf[sample(nrow(rastersf), 200) , ]
+#GUS glifo
+gusGlifo <- read.table("Datos/GUSglifo.txt", sep = "\t", header = TRUE)
+gusGlifo <- st_as_sf(gusGlifo, coords = c("Xt", "Yt"), crs = 32720)
 
 
-limiteCbaTrans <- st_transform(limiteCba, st_crs(predichosModelos))
+gusGlifo$CATGUSg10 <- factor(gusGlifo$CATGUSg10,
+                             levels = c ("Muy Alto",
+                                         "Alto",
+                                         "Moderado",
+                                         "Bajo",
+                                         "Muy bajo",
+                                         "Extremadamente bajo"),
+                             labels = c("Muy alto",
+                                        "Alto",
+                                        "Moderado",
+                                        "Bajo",
+                                        "Muy bajo",
+                                        "Extremadamente bajo")) 
 
 
-DEMPlot <- ggplot() +
-  geom_sf(data=limiteCbaTrans) +
-  geom_sf(data = rastersf, aes(color= value)) +
-  theme_map(limiteCbaTrans) +
-  scale_colour_gradientn(colours = terrain.colors(10)) +
-  labs(color = "Elevación")
+
+gusGlifo$CATGUSg40 <- factor(gusGlifo$CATGUSg40,
+                             levels = c ("Muy alto",
+                                         "Alto",
+                                         "Moderado",
+                                         "Bajo",
+                                         "Muy bajo",
+                                         "Extremadamente bajo")) 
 
 
-if(VERPLOT) DEMPlot
-if(GUARDARPLOT) {ggsave("Plots/DEM.tiff", plot = DEMPlot, 
-                        device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
+#### DEM y Cursos Agua ----
+# 
+# limiteCba <- limitesArg[limitesArg$NAM == "CÓRDOBA",]
+# elevation <- raster("Datos/DEM_yderivados_cba/dtm_elevation_merit.dem_m_250m_s0..0cm_2017_v1.0.tif")
+# 
+# elevation <- crop(elevation, st_transform(limiteCba,st_crs(elevation)))
+# elevation <- mask(elevation,st_zm(limiteCba))
+# elevation <- projectRaster(elevation, crs = st_crs(predichosModelos)$proj4string)
+# 
+# rastersf <- st_as_sf(gplot_data(elevation), coords = c("x","y"), crs = crs(elevation))
+# rastersf <- rastersf[ !is.na(rastersf$value), ]
+# rastersf <- st_transform(rastersf, st_crs(predichosModelos))
+# 
+# cuerposAguaMuestra <- cuerposAgua[sample(nrow(cuerposAgua), 200) , ]
+# elevationMuestra <- rastersf[sample(nrow(rastersf), 200) , ]
+# 
+# 
+# limiteCbaTrans <- st_transform(limiteCba, st_crs(predichosModelos))
+# 
+# 
+# DEMPlot <- ggplot() +
+#   geom_sf(data=limiteCbaTrans) +
+#   geom_sf(data = rastersf, aes(color= value)) +
+#   theme_map(limiteCbaTrans) +
+#   scale_colour_gradientn(colours = terrain.colors(10)) +
+#   labs(color = "Elevación")
+
+# 
+# if(VERPLOT) DEMPlot
+# if(GUARDARPLOT) {ggsave("Plots/DEM.tiff", plot = DEMPlot, 
+#                         device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
+
+### Cuencas Córdoba ----
+
+cuencas <- read_sf("Datos/cuencas_cba")
+# cuencas <- st_transform(cuencas, st_crs(limiteCba))
+# bordes <- st_bbox(cuencas)
+# names(bordes) <- c("left", "bottom", "right", "top")
+# 
+# Mapa <- get_stamenmap(bordes, zoom = 10, maptype = "terrain-lines")
+# ggmap(Mapa)
+
+# 
+# Mapa <- ggmap_bbox(Mapa)
+cuencas <- st_transform(cuencas, st_crs(32720))
+cuencas$Sistema <- sapply(gsub( "SISTEMA ","", x = cuencas$SISTEMA), simpleCap)
 
 
+
+#### Cobertura Suelo ----
+# cobertura <- raster("Datos/NivelesLandcover/Nivel1_9categorias.tif")
+# cobertura[!(cobertura[] %in% 0)]
+# 
+# 
+# 
+# cobertura <- rasterToPoints(cobertura)
+# cobertura <- data.frame(cobertura)
+# 
+# cobertura$values <- factor(cobertura$Nivel1_9categorias, 
+#        levels = 0:9,
+#        labels = c(NA,
+#                   "Bosques",
+#                   "Arbustales y matorrales",
+#                   "Pastizales",
+#                   "Suelo desnudo (Rocas, arenales y salinas)",
+#                   "Cuerpos de agua y áreas anegables",
+#                   "Infraestructura y asentamientos humanos",
+#                   "Cultivos anuales y pasturas manejadas",
+#                   "Plantaciones forestales (maderables)",
+#                   "Plantaciones perennes (frutales)"
+#        )
+#        )
+# 
+# cobertura <- cobertura[!is.na(cobertura$values), ]
+# 
+# ggplot(cobertura)+
+#   geom_raster(data=cobertura,aes(x,y,fill=Nivel1_9categorias ))
+# 
+# 
+# coberturadf <- gplot_data(cobertura)
+# sum(is.na(coberturadf$value))
+# ggplot(coberturadf) +
+#   geom_sf(aes(color = value))
+# 
+# class(cobertura)
+# cobertura@data
+# # To convert your RasterLayer to a data.frame, you need to convert it to
+# # a SpatialPixelsDataFrame first
+# r.spdf <- as(cobertura, "SpatialPixelsDataFrame")
+# r.df <- as.data.frame(r.spdf)
+# head(r.df)
+
+# then you can use ggplot2 to plot that object
+library(ggplot2)
+g <- ggplot(r.df, aes(x=x, y=y)) + 
+  geom_tile(aes(fill = Nivel1_9categorias)) + 
+  coord_equal()
+print(g)
 #### CAPITULO 1 ====
 #### Puntos muestreo Plot ----
 muestreoPlot  <- ggplot(muestreoSuelo) +
@@ -372,9 +480,12 @@ zonasKdT_multispati_Plot <- ggplot(zonasCap5) +
   geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
   geom_sf(aes(color =  Zonas_multispat_kd_t, fill =  Zonas_multispat_kd_t)) +
   theme_map(zonasCap5) +
-  scale_color_viridis_d(direction = -1, option = "inferno", begin = 0.4) +
-  scale_fill_viridis_d(direction = -1, option = "inferno", begin = 0.4) +
+  scale_color_manual(
+    values = c(scales::viridis_pal(option = "inferno", direction = -1, begin = 0.4)(4)[-4], "grey70" ),
+    breaks = levels(zonasCap5$Zonas_multispat_kd_t),
+    aesthetics = c("colour", "fill")) +
   labs(color = "Zonas", fill = "Zonas")
+
 
 if(VERPLOT) zonasKdT_multispati_Plot
 if(GUARDARPLOT) {ggsave("Plots/zonas_Kdt_Plot.tiff", plot =  zonasKdT_multispati_Plot,
@@ -386,10 +497,13 @@ zonasKoc_multispati_Plot <- ggplot(zonasCap5) +
   geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
   geom_sf(aes(color =  Zonas_multispati_koc_t, fill =  Zonas_multispati_koc_t)) +
   theme_map(zonasCap5) +
-  scale_color_viridis_d(direction = -1, option = "inferno", begin = 0.4) +
-  scale_fill_viridis_d(direction = -1, option = "inferno", begin = 0.4) +
+  scale_color_manual(
+    values = c(scales::viridis_pal(option = "inferno", direction = -1, begin = 0.4)(4)[-4], "grey70" ),
+    breaks = levels(zonasCap5$Zonas_multispati_koc_t),
+    aesthetics = c("colour", "fill")) +
   labs(color = "Zonas", fill = "Zonas")
-
+  
+  
 if(VERPLOT) zonasKoc_multispati_Plot
 if(GUARDARPLOT) {ggsave("Plots/zonas_Koc_Plot.tiff", plot =  zonasKoc_multispati_Plot,
                         device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
@@ -533,6 +647,37 @@ if(VERPLOT) CATGUSPredPlot
 if(GUARDARPLOT) {ggsave("Plots/CATGUSPredPlot_Pred.tiff", plot =  CATGUSPredPlot,
                         device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
 
+
+
+# Mapa catGUS Glifosato ----
+
+
+CATGUSglif10PredPlot <- ggplot(gusGlifo) +
+  geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
+  geom_sf(aes(color = CATGUSg10, fill = CATGUSg10)) +
+  theme_map(gusGlifo) +
+  scale_color_viridis_d(direction = 1, option = "inferno", begin = 0.4) +
+  scale_fill_viridis_d(direction = 1, option = "inferno", begin = 0.4) + 
+  labs(color = "GUS", fill = "GUS")
+
+CATGUSglif40PredPlot <- ggplot(gusGlifo) +
+  geom_sf(data = limitesArg, fill = NA, size = 0.4, color = "grey40") +
+  geom_sf(aes(color = CATGUSg40, fill = CATGUSg40)) +
+  theme_map(gusGlifo) +
+  scale_color_viridis_d(direction = 1, option = "inferno", begin = 0.4) +
+  scale_fill_viridis_d(direction = 1, option = "inferno", begin = 0.4) + 
+  labs(color = "GUS", fill = "GUS")
+
+
+CATGUSglif10_40Plot <- ggarrange(CATGUSglif10PredPlot, CATGUSglif40PredPlot,
+          ncol = 2, legend = "bottom", common.legend = TRUE)
+
+if(VERPLOT) CATGUSglif10_40Plot
+if(GUARDARPLOT) {ggsave("Plots/CATGUSglif10_40.tiff", plot =  CATGUSglif10_40Plot,
+                        device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
+
+
+
 # Mapa carta suelo ----
 
 
@@ -671,7 +816,7 @@ usoSueloPlot <- ggplot(UsoSuelo) +
   geom_sf(aes(color = Nivel_1, fill = Nivel_1)) +
   geom_sf(data = limitesArg, fill = NA) + 
   theme_map(UsoSuelo) + 
-  scale_fill_viridis_d(aesthetics = c("color", "fill")) +
+  scale_fill_brewer(palette = "Spectral", aesthetics = c("color", "fill")) +
   labs(color = "Usos", fill = "Usos")
 
 if(VERPLOT) usoSueloPlot
@@ -680,4 +825,15 @@ if(GUARDARPLOT) {ggsave("Plots/UsoSuelo.tiff", plot =  usoSueloPlot,
 
 # Mapa presencia de bt ----
 
+# Mapa cuencas ----
+
+
+cuencasPlot <- ggplot(cuencas) +
+  geom_sf(aes(color = Sistema, fill = Sistema), size = 1.2, alpha = 0.6) +
+  theme_map(cuencas) +
+  scale_fill_viridis_d(direction = -1, aesthetics = c('fill', 'color'))
+
+if(VERPLOT) cuencasPlot
+if(GUARDARPLOT) {ggsave("Plots/cuencasSistema.tiff", plot = cuencasPlot,
+                        device = "tiff", width = ANCHO, height = ALTO, units = "cm")}
 

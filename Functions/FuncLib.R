@@ -340,10 +340,13 @@ theme_map <- function(p,...) {
 #' @export
 
 gplot_data <- function(x, maxpixels = 50000)  {
+  # browser()
   x <- raster::sampleRegular(x, maxpixels, asRaster = TRUE)
   coords <- raster::xyFromCell(x, seq_len(raster::ncell(x)))
   ## Extract values
-  dat <- utils::stack(as.data.frame(raster::getValues(x))) 
+  valores <- raster::getValues(x)
+  # as.data.frame(raster::getValues(x))
+  dat <- utils::stack(as.data.frame(valores)) 
   names(dat) <- c('value', 'variable')
   
   dat <- dplyr::as.tbl(data.frame(coords, dat))
@@ -352,5 +355,26 @@ gplot_data <- function(x, maxpixels = 50000)  {
     dat <- dplyr::left_join(dat, levels(x)[[1]], 
                             by = c("value" = "ID"))
   }
-  dat
+  st_as_sf(dat, coords = c("x","y"), crs =  crs(x))
+  
+}
+
+
+
+
+
+simpleCap <- function(x) {
+  # browser()
+  x <- tolower(x)
+  
+  s <- strsplit(x, " ")[[1]]
+  miString <- paste(toupper(substring(s, 1,1)), substring(s, 2),
+                    sep="", collapse=" ")
+  if(any(strsplit(miString, " ")[[1]] == "De")) {
+    palabras <- strsplit(miString, " ")[[1]]
+    palabras[which(palabras == "De")] <- "de"
+    miString <- paste(palabras,
+                      sep="", collapse=" ")
+  }
+  miString
 }
